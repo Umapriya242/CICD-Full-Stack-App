@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Full Stack App 🚀</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+  <h1 class="text-center mb-4">Full Stack App 🚀</h1>
+
+  <div class="row justify-content-center mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input type="text" id="username" class="form-control" placeholder="Enter name">
+        <button class="btn btn-primary me-2" onclick="addUser()">Add User</button>
+        <button class="btn btn-secondary" onclick="getUsers()">Get Users</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <pre id="output" class="p-3 bg-white border rounded"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:3000/api";
+
+async function getUsers() {
+  try {
+    const res = await fetch(`${API_URL}/users`);
+    const data = await res.json();
+    document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+  } catch (err) {
+    document.getElementById("output").innerText = "Error fetching users";
+  }
+}
+
+async function addUser() {
+  const name = document.getElementById("username").value.trim();
+  if (!name) return alert("Name is required");
+
+  try {
+    const res = await fetch(`${API_URL}/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
+
+    if (!res.ok) throw new Error("Failed to add user");
+
+    document.getElementById("username").value = "";
+    getUsers();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+</script>
+</body>
+</html>
+
+
+
