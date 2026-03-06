@@ -9,6 +9,7 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
@@ -23,14 +24,11 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/project-backend ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/project-backend
 
-      - name: Build & Push Frontend (Nginx)
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/nginx ./frontend
-          docker push ${{ secrets.DOCKER_USERNAME }}/nginx
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -39,25 +37,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Install Docker & Docker Compose if not installed
-            if ! command -v docker &> /dev/null; then
-              sudo apt update
-              sudo apt install -y docker.io docker-compose
-              sudo systemctl enable docker
-              sudo systemctl start docker
-            fi
-
-            # Clone repo if not exists
-            if [ ! -d ~/CICD-Full-Stack-App ]; then
-              git clone https://github.com/your-username/CICD-Full-Stack-App.git ~/CICD-Full-Stack-App
-            fi
-
-            cd ~/CICD-Full-Stack-App
-
-            # Pull latest Docker images
+            cd CICD-Full-Stack-App
             docker pull ${{ secrets.DOCKER_USERNAME }}/project-backend
-            docker pull ${{ secrets.DOCKER_USERNAME }}/nginx
-
-            # Restart containers
             docker-compose down
             docker-compose up -d
